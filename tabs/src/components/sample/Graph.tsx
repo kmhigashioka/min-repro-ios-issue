@@ -12,39 +12,57 @@ import { TeamsFxContext } from "../Context";
 
 export function Graph() {
   const { teamsUserCredential } = useContext(TeamsFxContext);
-  const { loading, error, data, reload } = useGraphWithCredential(
-    async (graph, teamsUserCredential, scope) => {
-      // Call graph api directly to get user profile information
-      const profile = await graph.api("/me").get();
 
-      // Initialize Graph Toolkit TeamsFx provider
-      const provider = new TeamsFxProvider(teamsUserCredential, scope);
-      Providers.globalProvider = provider;
-      Providers.globalProvider.setState(ProviderState.SignedIn);
+  // const { loading, error, data, reload } = useGraphWithCredential(
+  //   async (graph, teamsUserCredential, scope) => {
+  //     // Call graph api directly to get user profile information
+  //     const profile = await graph.api("/me").get();
 
-      let photoUrl = "";
-      try {
-        const photo = await graph.api("/me/photo/$value").get();
-        photoUrl = URL.createObjectURL(photo);
-      } catch {
-        // Could not fetch photo from user's profile, return empty string as placeholder.
-      }
+  //     // Initialize Graph Toolkit TeamsFx provider
+  //     const provider = new TeamsFxProvider(teamsUserCredential, scope);
+  //     Providers.globalProvider = provider;
+  //     Providers.globalProvider.setState(ProviderState.SignedIn);
 
-      const authToken = await authentication.getAuthToken()
+  //     let photoUrl = "";
+  //     try {
+  //       const photo = await graph.api("/me/photo/$value").get();
+  //       photoUrl = URL.createObjectURL(photo);
+  //     } catch {
+  //       // Could not fetch photo from user's profile, return empty string as placeholder.
+  //     }
 
-      const context = await app.getContext()
+  //     const authToken = await authentication.getAuthToken()
 
-      return { profile, photoUrl, authToken, tenantId: context.user?.tenant?.id };
-    },
-    { scope: ["User.Read"], credential: teamsUserCredential }
-  );
+  //     const context = await app.getContext()
 
-  useEffect(() => {
-    const isNotYetSignedIn = !data && !loading && !error
-    if (isNotYetSignedIn) {
-      reload()
-    }
-  }, [data, error, loading, reload])
+  //     return { profile, photoUrl, authToken, tenantId: context.user?.tenant?.id };
+  //   },
+  //   { scope: ["User.Read"], credential: teamsUserCredential }
+  // );
+
+  // useEffect(() => {
+  //   const isNotYetSignedIn = !data && !loading && !error
+  //   if (isNotYetSignedIn) {
+  //     reload()
+  //   }
+  // }, [data, error, loading, reload])
+
+  function authorize() {
+    const url = new URL(`${window.location.origin}/auth-start.html`);
+    url.searchParams.set("clientId", process.env.REACT_APP_CLIENT_ID || "")
+    url.searchParams.set("scope", "User.Read email openid profile offline_access")
+
+    authentication.authenticate({
+      url: url.toString(),
+      width: 600,
+      height: 535})
+    .then((result) => {
+      console.log("Login succeeded: " + result);
+    })
+    .catch((reason) => {
+      console.log("Login failed: " + reason);
+    });
+  }
 
   return (
     <div>
@@ -53,14 +71,15 @@ export function Graph() {
       <div className="section-margin">
         <p>Click below to authorize button to grant permission to using Microsoft Graph.</p>
         <pre>{`credential.login(scope);`}</pre>
-        <Button primary content="Authorize" disabled={loading} onClick={reload} />
+        <Button primary content="Authorize" onClick={authorize} />
 
         <p>Below are two different implementations of retrieving profile photo for currently signed-in user using Fluent UI component and Graph Toolkit respectively.</p>
         <h4>1. Display user profile using Fluent UI Component</h4>
-        <PersonCardFluentUI loading={loading} data={data} error={error} />
+        {/* <PersonCardFluentUI loading={loading} data={data} error={error} />
         <h4>2. Display user profile using Graph Toolkit</h4>
         <PersonCardGraphToolkit loading={loading} data={data} error={error} />
-        <pre>{JSON.stringify(data, undefined, 4)}</pre>
+        <h4>Disable autologin</h4>
+        <pre>{JSON.stringify(data, undefined, 4)}</pre> */}
       </div>
     </div>
   );

@@ -21,7 +21,9 @@
           var currentURL = new URL(window.location);
           var clientId = currentURL.searchParams.get("clientId");
           var scope = currentURL.searchParams.get("scope");
-          var loginHint = currentURL.searchParams.get("loginHint");
+          // var loginHint = currentURL.searchParams.get("loginHint");
+
+          var loginHint = context.user.loginHint;
 
           const msalConfig = {
             auth: {
