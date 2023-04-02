@@ -183,6 +183,7 @@ export class TeamsBot extends TeamsActivityHandler {
         value: {
           title: "Try to replicate",
           url: "https://repiostea774976tab.z23.web.core.windows.net/index.html",
+          // url: "https://localhost:53000/index.html"
         },
       }
     }

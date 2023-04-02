@@ -1,5 +1,6 @@
 // Import required packages
 import * as restify from "restify";
+import { ConfidentialClientApplication } from "@azure/msal-node";
 
 // Import required bot services.
 // See https://aka.ms/bot-services to learn more about the different parts of a bot.
@@ -58,6 +59,7 @@ const bot = new TeamsBot();
 // Create HTTP server.
 const server = restify.createServer();
 server.use(restify.plugins.bodyParser());
+server.use(restify.plugins.queryParser())
 server.listen(process.env.port || process.env.PORT || 3978, () => {
   console.log(`\nBot Started, ${server.name} listening to ${server.url}`);
 });
@@ -68,3 +70,55 @@ server.post("/api/messages", async (req, res) => {
     await bot.run(context);
   });
 });
+
+const msalClient = new ConfidentialClientApplication({
+  auth: {
+    clientId: process.env.M365_CLIENT_ID,
+    clientSecret: process.env.M365_CLIENT_SECRET,
+  }
+});
+
+server.get("/api/me", async (req, res) => {
+  var tid = req.query.tid;
+  var token = req.query.token;
+  var scopes = ["https://graph.microsoft.com/User.Read"];
+
+  var oboPromise = new Promise((resolve, reject) => {
+    msalClient.acquireTokenOnBehalfOf({
+      authority: `https://login.microsoftonline.com/${tid}`,
+      oboAssertion: token,
+      scopes: scopes,
+      skipCache: false
+    }).then(result => {
+          fetch("https://graph.microsoft.com/v1.0/me/",
+            {
+              method: 'GET',
+              headers: {
+                "accept": "application/json",
+                "authorization": "bearer " + result.accessToken
+              },
+              mode: 'cors',
+              cache: 'default'
+            })
+            .then((response) => {
+              if (response.ok) {
+                return response.json();
+              } else {
+                throw (`Error ${response.status}: ${response.statusText}`);
+              }
+            })
+            .then((profile) => {
+              resolve(profile);
+            })
+    }).catch(error => {
+      reject({ "error": error.errorCode });
+    });
+  });
+
+  return oboPromise.then(function (result) {
+    res.json(result);
+  }, function (err) {
+    console.log(err); // Error: "It broke"
+    res.json(err);
+  });
+})

@@ -1,5 +1,5 @@
 import "./Graph.css";
-import { useGraph, useGraphWithCredential } from "@microsoft/teamsfx-react";
+import { useData, useGraphWithCredential } from "@microsoft/teamsfx-react";
 import { Providers, ProviderState } from '@microsoft/mgt-element';
 import { TeamsFxProvider } from '@microsoft/mgt-teamsfx-provider';
 import { authentication, app } from "@microsoft/teams-js";
@@ -11,72 +11,65 @@ import { useContext, useEffect, useState } from "react";
 import { TeamsFxContext } from "../Context";
 
 export function Graph() {
+  const [info, setInfo] = useState()
   const { teamsUserCredential } = useContext(TeamsFxContext);
-  const [error, setError] = useState()
-  const [data, setData] = useState("")
-  const [info, setInfo] = useState({})
+  // const { loading, error, data, reload } = useGraphWithCredential(
+  //   async (graph, teamsUserCredential, scope) => {
+  //     // Call graph api directly to get user profile information
+  //     const profile = await graph.api("/me").get();
 
-  useEffect(() => {
-    async function getInfo() {
-      const authToken = await authentication.getAuthToken({
-        silent: false,
-      })
-      const context = await app.getContext()
-      setInfo({ authToken, tenantId: context.user?.tenant?.id })
-    }
+  //     // Initialize Graph Toolkit TeamsFx provider
+  //     const provider = new TeamsFxProvider(teamsUserCredential, scope);
+  //     Providers.globalProvider = provider;
+  //     Providers.globalProvider.setState(ProviderState.SignedIn);
 
-    getInfo()
-  }, [])
+  //     let photoUrl = "";
+  //     try {
+  //       const photo = await graph.api("/me/photo/$value").get();
+  //       photoUrl = URL.createObjectURL(photo);
+  //     } catch {
+  //       // Could not fetch photo from user's profile, return empty string as placeholder.
+  //     }
 
-  const { loading, error: graphError, data: graphData, reload } = useGraph(
-    async (graph, teamsUserCredential, scope) => {
-      // Call graph api directly to get user profile information
-      const profile = await graph.api("/me").get();
+  //     const authToken = await authentication.getAuthToken()
+  //     const context = await app.getContext()
 
-      let photoUrl = "";
-      try {
-        const photo = await graph.api("/me/photo/$value").get();
-        photoUrl = URL.createObjectURL(photo);
-      } catch {
-        // Could not fetch photo from user's profile, return empty string as placeholder.
-      }
+  //     return { profile, photoUrl, authToken, context };
+  //   },
+  //   { scope: ["User.Read"], credential: teamsUserCredential }
+  // );
 
-      return { profile, photoUrl };
-
-      const authToken = await authentication.getAuthToken()
-
-      const context = await app.getContext()
-
-      return { profile, photoUrl, authToken, tenantId: context.user?.tenant?.id };
-    },
-    { scope: ["User.Read"] }
-  );
-
-  // useEffect(() => {
-  //   const isNotYetSignedIn = !data && !loading && !error
-  //   if (isNotYetSignedIn) {
-  //     reload()
-  //   }
-  // }, [data, error, loading, reload])
-
-  function authorize() {
-    const url = new URL(`${window.location.origin}/auth-start.html`);
-    url.searchParams.set("clientId", process.env.REACT_APP_CLIENT_ID || "")
-    url.searchParams.set("scope", "User.Read email openid profile offline_access")
-
-    authentication.authenticate({
-      url: url.toString(),
-      width: 600,
-      height: 535})
-    .then((result) => {
-      console.log("Login succeeded: " + result);
-      setData(result)
+  const { loading, data, error } = useData(async () => {
+    const userInfo = await teamsUserCredential!.getUserInfo();
+    const authToken = await authentication.getAuthToken()
+    const tid = userInfo.tenantId
+    const token = authToken
+    // @ts-ignore
+    setInfo({ tid, token })
+    fetch(`/api/me?tid=${tid}&token=${token}`, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      mode: 'cors',
+      cache: 'default'
     })
-    .catch((reason) => {
-      console.log("Login failed: " + reason);
-      setError(reason)
-    });
-  }
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          // @ts-ignore
+          throw response.error
+        }
+      })
+      .then((responseJson) => {
+        if (responseJson.error) {
+          throw responseJson.error;
+        } else {
+          const profile = responseJson;
+          return profile
+        }
+      });
+  });
 
   return (
     <div>
@@ -85,23 +78,18 @@ export function Graph() {
       <div className="section-margin">
         <p>Click below to authorize button to grant permission to using Microsoft Graph.</p>
         <pre>{`credential.login(scope);`}</pre>
-        <Button primary content="Authorize" onClick={authorize} />
+        {/* <Button primary content="Authorize" disabled={loading} onClick={reload} /> */}
 
         <p>Below are two different implementations of retrieving profile photo for currently signed-in user using Fluent UI component and Graph Toolkit respectively.</p>
         <h4>1. Display user profile using Fluent UI Component</h4>
-        {/* <PersonCardFluentUI loading={loading} data={data} error={error} />
+        {/* @ts-ignore */}
+        <PersonCardFluentUI loading={loading} data={data} error={error} />
         <h4>2. Display user profile using Graph Toolkit</h4>
-        <PersonCardGraphToolkit loading={loading} data={data} error={error} /> */}
-        <h4>data</h4>
+        {/* @ts-ignore */}
+        <PersonCardGraphToolkit loading={loading} data={data} error={error} />
         <pre>{JSON.stringify(data, undefined, 4)}</pre>
-        <h4>graphData</h4>
-        <pre>{JSON.stringify(graphData, undefined, 4)}</pre>
         <h4>info</h4>
         <pre>{JSON.stringify(info, undefined, 4)}</pre>
-        <h4>error</h4>
-        <pre>{JSON.stringify(error, undefined, 4)}</pre>
-        <h4>graphError</h4>
-        <pre>{JSON.stringify(graphError, undefined, 4)}</pre>
       </div>
     </div>
   );

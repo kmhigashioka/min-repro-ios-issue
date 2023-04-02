@@ -42,7 +42,10 @@ export function Welcome(props: { showFunction?: boolean; environment?: string })
   const { teamsUserCredential } = useContext(TeamsFxContext);
   const { loading, data, error } = useData(async () => {
     if (teamsUserCredential) {
-      const userInfo = await teamsUserCredential.getUserInfo();
+      const userInfo = await teamsUserCredential.getUserInfo(
+        ["https://graph.microsoft.com/User.Read"]
+      );
+      console.log({ userInfo })
       return userInfo;
     }
   });
