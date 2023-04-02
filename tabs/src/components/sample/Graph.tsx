@@ -1,5 +1,5 @@
 import "./Graph.css";
-import { useGraphWithCredential } from "@microsoft/teamsfx-react";
+import { useGraph, useGraphWithCredential } from "@microsoft/teamsfx-react";
 import { Providers, ProviderState } from '@microsoft/mgt-element';
 import { TeamsFxProvider } from '@microsoft/mgt-teamsfx-provider';
 import { authentication, app } from "@microsoft/teams-js";
@@ -7,38 +7,50 @@ import { Button } from "@fluentui/react-northstar";
 import { Design } from './Design';
 import { PersonCardFluentUI } from './PersonCardFluentUI';
 import { PersonCardGraphToolkit } from './PersonCardGraphToolkit';
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { TeamsFxContext } from "../Context";
 
 export function Graph() {
   const { teamsUserCredential } = useContext(TeamsFxContext);
+  const [error, setError] = useState()
+  const [data, setData] = useState("")
+  const [info, setInfo] = useState({})
 
-  // const { loading, error, data, reload } = useGraphWithCredential(
-  //   async (graph, teamsUserCredential, scope) => {
-  //     // Call graph api directly to get user profile information
-  //     const profile = await graph.api("/me").get();
+  useEffect(() => {
+    async function getInfo() {
+      const authToken = await authentication.getAuthToken({
+        silent: false,
+      })
+      const context = await app.getContext()
+      setInfo({ authToken, tenantId: context.user?.tenant?.id })
+    }
 
-  //     // Initialize Graph Toolkit TeamsFx provider
-  //     const provider = new TeamsFxProvider(teamsUserCredential, scope);
-  //     Providers.globalProvider = provider;
-  //     Providers.globalProvider.setState(ProviderState.SignedIn);
+    getInfo()
+  }, [])
 
-  //     let photoUrl = "";
-  //     try {
-  //       const photo = await graph.api("/me/photo/$value").get();
-  //       photoUrl = URL.createObjectURL(photo);
-  //     } catch {
-  //       // Could not fetch photo from user's profile, return empty string as placeholder.
-  //     }
+  const { loading, error: graphError, data: graphData, reload } = useGraph(
+    async (graph, teamsUserCredential, scope) => {
+      // Call graph api directly to get user profile information
+      const profile = await graph.api("/me").get();
 
-  //     const authToken = await authentication.getAuthToken()
+      let photoUrl = "";
+      try {
+        const photo = await graph.api("/me/photo/$value").get();
+        photoUrl = URL.createObjectURL(photo);
+      } catch {
+        // Could not fetch photo from user's profile, return empty string as placeholder.
+      }
 
-  //     const context = await app.getContext()
+      return { profile, photoUrl };
 
-  //     return { profile, photoUrl, authToken, tenantId: context.user?.tenant?.id };
-  //   },
-  //   { scope: ["User.Read"], credential: teamsUserCredential }
-  // );
+      const authToken = await authentication.getAuthToken()
+
+      const context = await app.getContext()
+
+      return { profile, photoUrl, authToken, tenantId: context.user?.tenant?.id };
+    },
+    { scope: ["User.Read"] }
+  );
 
   // useEffect(() => {
   //   const isNotYetSignedIn = !data && !loading && !error
@@ -58,9 +70,11 @@ export function Graph() {
       height: 535})
     .then((result) => {
       console.log("Login succeeded: " + result);
+      setData(result)
     })
     .catch((reason) => {
       console.log("Login failed: " + reason);
+      setError(reason)
     });
   }
 
@@ -77,9 +91,17 @@ export function Graph() {
         <h4>1. Display user profile using Fluent UI Component</h4>
         {/* <PersonCardFluentUI loading={loading} data={data} error={error} />
         <h4>2. Display user profile using Graph Toolkit</h4>
-        <PersonCardGraphToolkit loading={loading} data={data} error={error} />
-        <h4>Disable autologin</h4>
-        <pre>{JSON.stringify(data, undefined, 4)}</pre> */}
+        <PersonCardGraphToolkit loading={loading} data={data} error={error} /> */}
+        <h4>data</h4>
+        <pre>{JSON.stringify(data, undefined, 4)}</pre>
+        <h4>graphData</h4>
+        <pre>{JSON.stringify(graphData, undefined, 4)}</pre>
+        <h4>info</h4>
+        <pre>{JSON.stringify(info, undefined, 4)}</pre>
+        <h4>error</h4>
+        <pre>{JSON.stringify(error, undefined, 4)}</pre>
+        <h4>graphError</h4>
+        <pre>{JSON.stringify(graphError, undefined, 4)}</pre>
       </div>
     </div>
   );
