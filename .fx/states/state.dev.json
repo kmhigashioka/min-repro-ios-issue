@@ -6,46 +6,46 @@
         "subscriptionName": "Azure subscription 1",
         "tenantId": "9f3a3a52-5cf5-44f6-b464-43bee41855d8",
         "needCreateResourceGroup": false,
-        "resourceGroupName": "repiosteamsapp-dev-rg",
-        "location": "southeastasia",
-        "resourceNameSuffix": "abc120"
+        "resourceGroupName": "iosiss",
+        "location": "East US",
+        "resourceNameSuffix": "aa0482"
     },
     "fx-resource-appstudio": {
         "tenantId": "1da33906-b4a0-47ab-b6aa-6a161752c830",
-        "teamsAppId": "18a36a3e-4322-46e9-8ff4-a006a6dd4463"
+        "teamsAppId": "575d026f-1e2f-4acd-b7fd-bf7ffd6dfdd6"
     },
     "fx-resource-frontend-hosting": {
         "indexPath": "/index.html#",
-        "domain": "repiostea774976tab.z23.web.core.windows.net",
-        "endpoint": "https://repiostea774976tab.z23.web.core.windows.net",
-        "storageResourceId": "/subscriptions/3a2181ef-c7ec-46d5-bd07-f073d7c10645/resourceGroups/repiosteamsapp-dev-rg/providers/Microsoft.Storage/storageAccounts/repiostea774976tab"
+        "domain": "repiostea774976tab.z13.web.core.windows.net",
+        "endpoint": "https://repiostea774976tab.z13.web.core.windows.net",
+        "storageResourceId": "/subscriptions/3a2181ef-c7ec-46d5-bd07-f073d7c10645/resourceGroups/iosiss/providers/Microsoft.Storage/storageAccounts/repiostea774976tab"
     },
     "fx-resource-aad-app-for-teams": {
-        "clientId": "de0ff9c1-02a6-4868-bb05-222ac3bef433",
+        "clientId": "ef3cc44d-6f7b-4d20-9756-c71de4518f87",
         "clientSecret": "{{fx-resource-aad-app-for-teams.clientSecret}}",
-        "objectId": "47eda54a-6b73-4dbb-a719-8d630d7684fc",
-        "oauth2PermissionScopeId": "58557f79-2d4e-490c-ac4a-b501fafd2dae",
+        "objectId": "96440dd2-9405-4805-95fb-0ba56eee8496",
+        "oauth2PermissionScopeId": "e43e0b60-8b00-4e94-830d-c10183a76e65",
         "tenantId": "1da33906-b4a0-47ab-b6aa-6a161752c830",
         "oauthHost": "https://login.microsoftonline.com",
         "oauthAuthority": "https://login.microsoftonline.com/1da33906-b4a0-47ab-b6aa-6a161752c830",
-        "applicationIdUris": "api://repiostea774976tab.z23.web.core.windows.net/botid-0091ed4f-d1d0-4a22-ac97-ebbb3aba4e19",
-        "botId": "0091ed4f-d1d0-4a22-ac97-ebbb3aba4e19",
+        "applicationIdUris": "api://repiostea774976tab.z13.web.core.windows.net/botid-f3c396fd-db71-4550-a86a-c1eedbe223dc",
+        "botId": "f3c396fd-db71-4550-a86a-c1eedbe223dc",
         "botEndpoint": "https://repiostea774976bot.azurewebsites.net",
-        "frontendEndpoint": "https://repiostea774976tab.z23.web.core.windows.net"
+        "frontendEndpoint": "https://repiostea774976tab.z13.web.core.windows.net"
     },
     "fx-resource-bot": {
-        "botId": "0091ed4f-d1d0-4a22-ac97-ebbb3aba4e19",
+        "botId": "f3c396fd-db71-4550-a86a-c1eedbe223dc",
         "botPassword": "{{fx-resource-bot.botPassword}}",
         "skuName": "B1",
         "siteName": "repiostea774976bot",
         "domain": "repiostea774976bot.azurewebsites.net",
         "appServicePlanName": "repiostea774976bot",
-        "resourceId": "/subscriptions/3a2181ef-c7ec-46d5-bd07-f073d7c10645/resourceGroups/repiosteamsapp-dev-rg/providers/Microsoft.Web/sites/repiostea774976bot",
+        "resourceId": "/subscriptions/3a2181ef-c7ec-46d5-bd07-f073d7c10645/resourceGroups/iosiss/providers/Microsoft.Web/sites/repiostea774976bot",
         "siteEndpoint": "https://repiostea774976bot.azurewebsites.net"
     },
     "fx-resource-identity": {
         "identityName": "repiostea774976",
-        "identityResourceId": "/subscriptions/3a2181ef-c7ec-46d5-bd07-f073d7c10645/resourceGroups/repiosteamsapp-dev-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/repiostea774976",
-        "identityClientId": "e29e96fc-c297-4105-ac02-5bfde7708ddb"
+        "identityResourceId": "/subscriptions/3a2181ef-c7ec-46d5-bd07-f073d7c10645/resourceGroups/iosiss/providers/Microsoft.ManagedIdentity/userAssignedIdentities/repiostea774976",
+        "identityClientId": "92ba752b-dfdb-45b0-9046-64e66f1bab17"
     }
 }
